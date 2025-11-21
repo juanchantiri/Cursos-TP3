@@ -49,112 +49,57 @@ function getCursosPorCategoria($req, $res) {
                 'error' => 'Error del servidor al obtener los cursos.','detalle' => $e->getMessage()], 500);
         }
     }
-    // }
 
-    // function asignarNombreCategoria($curso,$categoria){
-    //     foreach ($curso as $cur) {
-    //         // Busco la categoría correspondiente al curso
-    //         foreach ($categoria as $cat) {
-    //             if ($cur->id_categoria == $cat->id) {
-    //                 $cur->categoria_nombre = $cat->nombre;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
-    // function addCursos(){
-    //     $titulo = $_POST['titulo'];
-    //     $descripcion = $_POST['descripcion']; 
-    //     $id_categoria = $_POST['id_categoria'];
-    //     $instructor =$_POST['instructor'];
+    function addCursos($req, $res){
+            if(!isset($req->body->titulo) || !isset($req->body->descripcion) || !isset($req->body->id_categoria) || !isset($req->body->instructor) || empty($req->body->titulo) || empty($req->body->descripcion) || empty($req->body->id_categoria) || empty($req->body->instructor)){
+            return $res->json("Faltan completar datos", 400);
+            }
+            $titulo = $req->body->titulo;
+            $descripcion =  $req->body->descripcion; 
+            $id_categoria =  $req->body->id_categoria;
+            $instructor = $req->body->instructor;
 
-    //     $imagenUrl = null;
+            $id_nuevo_curso = $this->model->añadirCursos($titulo, $descripcion,$instructor, $id_categoria);
 
-    //     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-    //         $directorioDestino = __DIR__ . '/../view/imgs/';
-    //         $archivoTmp = $_FILES['imagen']['tmp_name'];
-    //         $nombreArchivo = uniqid() . '-' . $_FILES['imagen']['name'];
+        if (!$id_nuevo_curso || $id_nuevo_curso <= 0) {
+          return $res->json("Error al obtener el ID del producto insertado.", 404);
+         }
+         $cursoNuevo = $this->model->curso($id_nuevo_curso);
+         return $res->json($cursoNuevo);
+    }
+    function deleteCurso($req, $res){
+        $id_curso = $req->params->id;
+        $curso = $this->model->curso($id_curso);
 
-    //         if (move_uploaded_file($archivoTmp, $directorioDestino . $nombreArchivo)) {
-    //             $imagenUrl = $nombreArchivo;
-    //         } else {
-    //             return $this->view->mostrarError(" Error al mover la imagen (permisos o ruta).");
-    //         }
-    //     }
+        if(!$curso){
+            return $res->json("El curso con el id = $id_curso no existe", 404);
+        }
 
-    //     $id_nuevo_curso = $this->model->añadirCursos($titulo, $descripcion,$instructor, $imagenUrl, $id_categoria);
-
-    //     if (!$id_nuevo_curso || $id_nuevo_curso <= 0) {
-    //         return $this->view->mostrarError("Error al obtener el ID del producto insertado.");
-    //     }
-    //     header('Location: ' . BASE_URL . 'listar');
-    // }
-
-    // function listarPorCategoria($params = []) {
-    //     $id_categoria = null;
-    //     $categorias = $this->categorias_model->getCategorias();
-    //     if (isset($params[1]) && is_numeric($params[1])) {
-    //         $id_categoria = (int)$params[1];
-    //     } else {
-    //         return $this->view->mostrarError("Error: Se requiere un ID de categoría válido.");
-    //     }
-
-    //     $cursos = $this->model->getCursosByCategoria($id_categoria);
-        
-    //     $nombre_categoria = "Cursos Filtrados";
-    //     if (!empty($cursos)) {
-    //         $nombre_categoria = $cursos[0]->nombre_categoria; 
-    //     } 
-    //     $this->view->mostrarCursosPorCategoria($cursos, $nombre_categoria, $categorias);
-    // }
-
-    // function deleteCurso($id){
-    //     $this->model->eliminarCurso($id);
-
-    //     header('Location: ' . BASE_URL . 'listar');
-    // }
+        $this->model->eliminarCurso($id_curso);
+        return $res->json("El curso con el id = $id_curso a sido eliminado", 200);
+    }
 
 
-    // function editarCurso($id){
-    //     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    //         $curso = $this->model->curso($id);
-    //         $categorias = $this->categorias_model->getCategorias();
+    function editarCurso($req, $res){
+        $id_curso = $req->params->id;
+        $curso = $this->model->curso($id_curso);
 
-    //         if (!$curso) {
-    //             return $this->view->mostrarError("El curso a editar no existe.");
-    //         }
+        if(!$curso){
+            return $res->json("El curso con el id = $id_curso no existe", 404);
+        }
 
-    //         return $this->view->mostrarUpdateCurso($curso, $categorias);
-    //     }
+        if(!isset($req->body->titulo) || !isset($req->body->descripcion) || !isset($req->body->id_categoria) || !isset($req->body->instructor) || empty($req->body->titulo) || empty($req->body->descripcion) || empty($req->body->id_categoria) || empty($req->body->instructor)){
+            return $res->json('Faltan datos', 400);
+        }
+            $titulo = $req->body->titulo;
+            $descripcion =  $req->body->descripcion; 
+            $id_categoria =  $req->body->id_categoria;
+            $instructor = $req->body->instructor;
 
-    //     $titulo = $_POST['titulo'];
-    //     $descripcion = $_POST['descripcion'];
-    //     $instructor = $_POST['instructor'];
-    //     $id_categoria = $_POST['id_categoria'];
+        $this->model->updateCurso($id_curso, $titulo, $descripcion,$instructor, $id_categoria);
 
-    //     $productoActual = $this->model->curso($id);
+        $CursoEditado = $this->model->curso($id_curso);
 
-    //     if (!$productoActual) {
-    //         return $this->view->mostrarError("El curso con ID $id no existe o fue eliminado.");
-    //     }
-
-    //     $imagenUrl = $productoActual->imagen;
-
-    //     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-    //         $directorioDestino = 'app/view/imgs/';
-    //         $archivoTmp = $_FILES['imagen']['tmp_name'];
-    //         $nombreArchivo = uniqid() . '-' . $_FILES['imagen']['name'];
-
-    //         if (move_uploaded_file($archivoTmp, $directorioDestino . $nombreArchivo)) {
-    //             $imagenUrl = $nombreArchivo;
-    //         } else {
-    //             return $this->view->mostrarError("Error al mover la imagen (permisos o ruta).");
-    //         }
-    //     }
-
-    //     $this->model->updateCurso($id, $titulo, $descripcion, $instructor, $id_categoria, $imagenUrl);
-
-    //     header('Location: ' . BASE_URL . "detalle/$id");
-    //     exit;
-    // }
+        return $res->json($CursoEditado, 201);
+     }
     }

@@ -18,6 +18,9 @@ $router->addMiddleware(new JWTMiddleware());
 
 
 $router->addRoute('cursos', 'GET', 'cursos_controller', 'getCursos');
+$router->addRoute('cursos', 'POST', 'cursos_controller', 'addCursos');
+$router->addRoute('cursos/:id', 'DELETE', 'cursos_controller', 'deleteCurso');
+$router->addRoute('cursos/:id', 'PUT', 'cursos_controller', 'editarCurso');
 $router->addRoute('cursos/categoria/:id', 'GET', 'cursos_controller', 'getCursosPorCategoria');
 
 

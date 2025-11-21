@@ -18,13 +18,11 @@ class cursos_model{
     }
 
 
-
-
     
-    function añadirCursos($titulo, $descripcion,$instructor, $imagen, $id_categoria){
+    function añadirCursos($titulo, $descripcion,$instructor, $id_categoria){
         $db = $this->connect();
-        $query = $db->prepare("INSERT INTO curso(titulo, descripcion, instructor, imagen, id_categoria) VALUES (?, ?, ?, ?, ?)");
-        $query->execute([$titulo, $descripcion,$instructor, $imagen, $id_categoria]);
+        $query = $db->prepare("INSERT INTO curso(titulo, descripcion, instructor, id_categoria) VALUES (?, ?, ?, ?)");
+        $query->execute([$titulo, $descripcion,$instructor, $id_categoria]);
         return $db->lastInsertId();
     }
 
@@ -52,9 +50,9 @@ class cursos_model{
         return $query->fetch(PDO::FETCH_OBJ);
     }
 
-    function updateCurso($id, $titulo, $descripcion, $instructor, $id_categoria, $imagenUrl) {
+    function updateCurso($id, $titulo, $descripcion, $instructor, $id_categoria) {
         $db = $this->connect();
-        $query = $db->prepare("UPDATE curso SET titulo = ?, descripcion = ?, instructor = ?, id_categoria = ?, imagen = ? WHERE id = ?");
-        $query->execute([$titulo, $descripcion, $instructor, $id_categoria, $imagenUrl, $id]);
+        $query = $db->prepare("UPDATE curso SET titulo = ?, descripcion = ?, instructor = ?, id_categoria = ? WHERE id = ?");
+        $query->execute([$titulo, $descripcion, $instructor, $id_categoria, $id]);
     }
 }
